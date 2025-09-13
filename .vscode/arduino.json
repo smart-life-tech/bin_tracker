@@ -1,6 +1,6 @@
 {
     "board": "arduino:avr:nano",
     "configuration": "cpu=atmega328old",
-    "sketch": "bin_tracker.ino",
+    "sketch": "bin_tracker_vlx.ino",
     "port": "COM10"
 }
