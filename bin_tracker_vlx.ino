@@ -19,11 +19,11 @@ const unsigned long TILE_ON_MS = 5000UL; // 30 s
 // Battery monitor
 const uint8_t BATTERY_PIN = A7;     // voltage divider into A7
 const float VOLTAGE_DIVIDER = 2.0;  // e.g. 100 kΩ/100 kΩ
-const float LOW_BATTERY_VOLT = 3.3; // warn if below 3.3 V
+const float LOW_BATTERY_VOLT = 5.3; // warn if below 3.3 V
 
 // Pins
 const uint8_t PIN_SENSOR_PWR = 7; // MOSFET gate for VL53L0X VCC
-const uint8_t PIN_TILE_PWR = 6;   // MOSFET gate for Tile Pro VCC
+const uint8_t PIN_TILE_PWR = 2;   // MOSFET gate for Tile Pro VCC
 const uint8_t PIN_LED = 13;       // on‑board LED
 
 // Measurement
@@ -72,7 +72,7 @@ void setup()
     delay(100); // Wait for sensor to power up
 
     sensor.init();
-    sensor.setTimeout(500); // Timeout in ms
+    sensor.setTimeout(1000); // Timeout in ms
 
     digitalWrite(PIN_SENSOR_PWR, LOW); // Power down sensor
 
