@@ -1,6 +1,6 @@
 #include <LowPower.h> // https://github.com/rocketscream/Low-Power
 #include <Arduino.h>
-#include <VL53L1X.h> // VL53L1X library for laser distance sensor 
+#include <VL53L1X.h> // VL53L1X library for laser distance sensor https://github.com/pololu/vl53l1x-arduino
 #include <Wire.h>    // I2C library
 
 // ——— CONFIGURATION —————————————————————————————————————————————————————
