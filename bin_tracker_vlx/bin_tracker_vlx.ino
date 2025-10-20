@@ -1,14 +1,14 @@
 #include <LowPower.h> // https://github.com/rocketscream/Low-Power
 #include <Arduino.h>
-#include <VL53L0X.h> // VL53L0X library for laser distance sensor
+#include <VL53L1X.h> // VL53L1X library for laser distance sensor 
 #include <Wire.h>    // I2C library
 
 // ——— CONFIGURATION —————————————————————————————————————————————————————
 #define DEBUG // comment out to disable Serial debug
 
 // Timing
-const unsigned long CHECK_INTERVAL_MS = 80000UL; // 1 hour
-const unsigned long SLEEP_CYCLE_MS = 10000UL;    // WDT wake interval
+const unsigned long CHECK_INTERVAL_MS = 1000UL; // 1 hour
+const unsigned long SLEEP_CYCLE_MS = 1000UL;    // WDT wake interval
 
 // Bin‑full threshold (cm)
 const uint16_t FULL_THRESHOLD_CM = 15;
@@ -32,7 +32,7 @@ const unsigned long READ_DELAY_MS = 50; // between readings
 
 // ——— GLOBALS —————————————————————————————————————————————————————————————
 unsigned long elapsedMs = 0;
-VL53L0X sensor; // VL53L0X sensor object
+VL53L1X sensor; // VL53L1X sensor object
 
 #ifdef DEBUG
 #define DBG_START() Serial.begin(9600)
@@ -66,17 +66,23 @@ void setup()
 
     // Initialize I2C
     Wire.begin();
+    Wire.setClock(400000); // use 400 kHz I2C
 
-    // Power sensor, initialize VL53L0X
+    // Power sensor, initialize VL53L1X
     digitalWrite(PIN_SENSOR_PWR, HIGH);
     delay(100); // Wait for sensor to power up
 
-    sensor.init();
-    sensor.setTimeout(1000); // Timeout in ms
+    if (!sensor.init())
+    {
+        Serial.println("Failed to detect and initialize sensor!");
+        while (1);
+    }
+
+    // Use long distance mode and allow up to 50000 us (50 ms) for a measurement.
+    sensor.setDistanceMode(VL53L1X::Long);
+    sensor.setMeasurementTimingBudget(50000);
 
     digitalWrite(PIN_SENSOR_PWR, LOW); // Power down sensor
-    sensor.startContinuous();
-    delay(5000);
 }
 
 // ——— MAIN LOOP ———————————————————————————————————————————————————————————
@@ -106,6 +112,9 @@ void loop()
     digitalWrite(PIN_SENSOR_PWR, HIGH);
     delay(100);
 
+    // Start continuous readings at a rate of one measurement every 50 ms
+    sensor.startContinuous(50);
+
     // 4) Measure distance (average of N readings)
     long sum = 0;
     for (uint8_t i = 0; i < DIST_READINGS; i++)
@@ -124,6 +133,7 @@ void loop()
     Serial.print(distance);
     Serial.println(" cm");
 
+    sensor.stopContinuous();
     digitalWrite(PIN_SENSOR_PWR, LOW); // power down sensor
 
     // 5) If bin full → power Tile for TILE_ON_MS
@@ -149,10 +159,10 @@ void sleepCycle()
     LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
 }
 
-// Measure distance using VL53L0X, return cm (or –1 on timeout)
+// Measure distance using VL53L1X, return cm (or –1 on timeout)
 long measureDistance()
 {
-    uint16_t distance_mm = sensor.readRangeSingleMillimeters();
+    uint16_t distance_mm = sensor.read();
     
     if (sensor.timeoutOccurred())
     {
