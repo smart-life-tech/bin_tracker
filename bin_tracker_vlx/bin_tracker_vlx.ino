@@ -7,8 +7,8 @@
 #define DEBUG // comment out to disable Serial debug
 
 // Timing
-const unsigned long CHECK_INTERVAL_MS = 800UL; // 1 hour
-const unsigned long SLEEP_CYCLE_MS = 100UL;    // WDT wake interval
+const unsigned long CHECK_INTERVAL_MS = 80000UL; // 1 hour
+const unsigned long SLEEP_CYCLE_MS = 10000UL;    // WDT wake interval
 
 // Bin‑full threshold (cm)
 const uint16_t FULL_THRESHOLD_CM = 15;
@@ -17,7 +17,7 @@ const uint16_t FULL_THRESHOLD_CM = 15;
 const unsigned long TILE_ON_MS = 5000UL; // 30 s
 
 // Battery monitor
-const uint8_t BATTERY_PIN = A7;     // voltage divider into A7
+const uint8_t BATTERY_PIN = A0;     // voltage divider into A7
 const float VOLTAGE_DIVIDER = 2.0;  // e.g. 100 kΩ/100 kΩ
 const float LOW_BATTERY_VOLT = 5.3; // warn if below 3.3 V
 
@@ -75,7 +75,7 @@ void setup()
     sensor.setTimeout(1000); // Timeout in ms
 
     digitalWrite(PIN_SENSOR_PWR, LOW); // Power down sensor
-
+    sensor.startContinuous();
     delay(5000);
 }
 
@@ -146,13 +146,14 @@ void loop()
 // Perform one WDT sleep cycle
 void sleepCycle()
 {
-    LowPower.powerDown(SLEEP_1S, ADC_OFF, BOD_OFF);
+    LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
 }
 
 // Measure distance using VL53L0X, return cm (or –1 on timeout)
 long measureDistance()
 {
     uint16_t distance_mm = sensor.readRangeSingleMillimeters();
+    
     if (sensor.timeoutOccurred())
     {
         return -1;
