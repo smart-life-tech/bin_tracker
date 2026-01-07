@@ -138,7 +138,7 @@ void main(void)
         while(1)
         {
             RA4 = 1;
-            Delay_ms(100);
+            Delay_ms(500);
             RA4 = 0;
             Delay_ms(100);
         }
