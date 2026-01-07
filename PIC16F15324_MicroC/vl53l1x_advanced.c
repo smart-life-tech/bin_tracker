@@ -199,9 +199,9 @@ void GPIO_Init(void)
     TRISA = 0b00010011;      // RA4 and RA5 as outputs
     PORTA = 0x00;
     
-    // Configure Port C - I2C on RC3 (SCL), RC4 (SDA)
+    // Configure Port C - I2C on RC0 (SCL), RC1 (SDA)
     ANSELC = 0x00;           // All digital I/O
-    TRISC = 0b00011000;      // RC3, RC4 as open-drain inputs
+    TRISC = 0b11111100;      // RC0, RC1 as open-drain inputs
     PORTC = 0x00;
 }
 
@@ -621,11 +621,12 @@ void Delay_ms(unsigned int ms)
 }
 
 /*
- * Hardware Connections (same as before):
+ * Hardware Connections:
  * VL53L1X VCC  -> VDD (Pin 15)
  * VL53L1X GND  -> VSS (Pin 8/16)
- * VL53L1X SCL  -> RC3 (Pin 11) with 4.7kΩ pull-up
- * VL53L1X SDA  -> RC4 (Pin 10) with 4.7kΩ pull-up
- * LED Anode    -> 220Ω resistor -> RA4 (Pin 3)
+ * VL53L1X SCL  -> RC0 (Pin 7) with 4.7kΩ pull-up
+ * VL53L1X SDA  -> RC1 (Pin 6) with 4.7kΩ pull-up
+ * Proximity LED -> 220Ω resistor -> RA4 (Pin 3)
+ * Heartbeat LED -> 220Ω resistor -> RA5 (Pin 2)
  * LED Cathode  -> VSS (Ground)
  */
