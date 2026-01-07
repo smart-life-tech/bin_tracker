@@ -87,6 +87,7 @@ typedef struct {
 volatile uint8_t i2c_error = 0;
 static MeasurementData measurement;
 static DistanceMode current_distance_mode = Long;
+static unsigned int heartbeat_counter = 0;  // Counter for heartbeat LED (RA5)
 
 // ============================================================================
 // Function Prototypes
@@ -175,6 +176,14 @@ void main(void)
             }
         }
         
+        // Heartbeat LED on RA5 - blink every 500ms to show system is running
+        heartbeat_counter++;
+        if(heartbeat_counter >= 10)  // 10 * 50ms = 500ms
+        {
+            RA5 = ~RA5;  // Toggle heartbeat LED
+            heartbeat_counter = 0;
+        }
+        
         Delay_ms(50);
     }
 }
@@ -185,9 +194,9 @@ void main(void)
 
 void GPIO_Init(void)
 {
-    // Configure Port A - LED on RA4
+    // Configure Port A - LED on RA4 (proximity), RA5 (heartbeat)
     ANSELA = 0x00;           // All digital I/O
-    TRISA = 0b00010111;      // RA4 as output
+    TRISA = 0b00010011;      // RA4 and RA5 as outputs
     PORTA = 0x00;
     
     // Configure Port C - I2C on RC3 (SCL), RC4 (SDA)
