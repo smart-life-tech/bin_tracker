@@ -12,14 +12,17 @@
  * I2C Clock: 100 kHz
  */
 
-// Oscillator configuration
-#pragma config FEXTOSC = OFF
-#pragma config RSTOSC = LFINTOSCPWR_1MHZIDLED
-#pragma config MCLRE = ON
-#pragma config BOREN = ON
-#pragma config WDTE = OFF
-#pragma config IESO = OFF
-#pragma config PWRTE = ON
+// Oscillator configuration (PIC16F887)
+#pragma config FOSC = INTRC_NOCLKOUT   // Internal oscillator, no clock output
+#pragma config WDTE = OFF              // Watchdog timer disabled
+#pragma config PWRTE = ON              // Power-up timer enabled
+#pragma config MCLRE = ON              // MCLR pin enabled
+#pragma config CP = OFF                // Code protection off
+#pragma config CPD = OFF               // Data code protection off
+#pragma config BOREN = ON              // Brown-out reset enabled
+#pragma config IESO = OFF              // Internal/external oscillator switchover off
+#pragma config FCMEN = OFF             // Fail-safe clock monitor off
+#pragma config LVP = OFF               // Low voltage programming disabled
 
 // ============================================================================
 // VL53L1X Register Map (from Arduino library reference)
