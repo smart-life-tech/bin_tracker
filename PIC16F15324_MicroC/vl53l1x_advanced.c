@@ -12,14 +12,16 @@
  * I2C Clock: 100 kHz
  */
 
-// Oscillator configuration
-#pragma config FEXTOSC = OFF
-#pragma config RSTOSC = LFINTOSCPWR_1MHZIDLED
-#pragma config MCLRE = ON
-#pragma config BOREN = ON
-#pragma config WDTE = OFF
-#pragma config IESO = OFF
-#pragma config PWRTE = ON
+#include <xc.h>
+#include <stdint.h>
+
+// Oscillator configuration for PIC16F15324
+#pragma config FEXTOSC = OFF        // Disable external oscillator
+#pragma config RSTOSC = HFINTOSCPWR // Use high-speed internal oscillator
+#pragma config MCLRE = ON           // MCLR pin enabled
+#pragma config BOREN = ON           // Brown-out reset enabled
+#pragma config WDTE = OFF           // Watchdog timer off
+#pragma config PWRTE = ON           // Power-up timer enabled
 
 // ============================================================================
 // VL53L1X Register Map (from Arduino library reference)
@@ -104,12 +106,12 @@ void I2C_Send_Byte(unsigned char data);
 unsigned char I2C_Receive_Byte(unsigned char ack);
 
 // Register Access Functions
-unsigned char I2C_Write_Register(uint16_t reg, unsigned char value);
-unsigned char I2C_Read_Register(uint16_t reg, unsigned char *value);
-unsigned char I2C_Write_Register16(uint16_t reg, uint16_t value);
-unsigned char I2C_Read_Register16(uint16_t reg, uint16_t *value);
-unsigned char I2C_Write_Register32(uint16_t reg, uint32_t value);
-unsigned char I2C_Read_Register32(uint16_t reg, uint32_t *value);
+unsigned char I2C_Write_Register(int reg, unsigned char value);
+unsigned char I2C_Read_Register(int reg, unsigned char *value);
+unsigned char I2C_Write_Register16(int reg, int value);
+unsigned char I2C_Read_Register16(int reg, int *value);
+unsigned char I2C_Write_Register32(int reg, int value);
+unsigned char I2C_Read_Register32(int reg, int *value);
 
 // VL53L1X Functions
 unsigned char VL53L1X_Init(void);
@@ -117,7 +119,7 @@ unsigned char VL53L1X_Soft_Reset(void);
 unsigned char VL53L1X_Check_Model_ID(void);
 unsigned char VL53L1X_Set_Distance_Mode(DistanceMode mode);
 unsigned char VL53L1X_Start_Single_Shot(void);
-unsigned char VL53L1X_Start_Continuous(uint32_t period_ms);
+unsigned char VL53L1X_Start_Continuous(int period_ms);
 unsigned char VL53L1X_Stop_Continuous(void);
 unsigned char VL53L1X_Is_Data_Ready(void);
 unsigned char VL53L1X_Read_Measurement(MeasurementData *data);
@@ -264,7 +266,7 @@ unsigned char I2C_Receive_Byte(unsigned char ack)
 // Register Access - 8-bit
 // ============================================================================
 
-unsigned char I2C_Write_Register(uint16_t reg, unsigned char value)
+unsigned char I2C_Write_Register(int reg, unsigned char value)
 {
     unsigned char reg_high = (unsigned char)((reg >> 8) & 0xFF);
     unsigned char reg_low = (unsigned char)(reg & 0xFF);
@@ -291,7 +293,7 @@ unsigned char I2C_Write_Register(uint16_t reg, unsigned char value)
     return 1;
 }
 
-unsigned char I2C_Read_Register(uint16_t reg, unsigned char *value)
+unsigned char I2C_Read_Register(int reg, unsigned char *value)
 {
     unsigned char reg_high = (unsigned char)((reg >> 8) & 0xFF);
     unsigned char reg_low = (unsigned char)(reg & 0xFF);
@@ -322,7 +324,7 @@ unsigned char I2C_Read_Register(uint16_t reg, unsigned char *value)
 // Register Access - 16-bit
 // ============================================================================
 
-unsigned char I2C_Write_Register16(uint16_t reg, uint16_t value)
+unsigned char I2C_Write_Register16(int reg, int value)
 {
     unsigned char reg_high = (unsigned char)((reg >> 8) & 0xFF);
     unsigned char reg_low = (unsigned char)(reg & 0xFF);
@@ -349,7 +351,7 @@ unsigned char I2C_Write_Register16(uint16_t reg, uint16_t value)
     return 1;
 }
 
-unsigned char I2C_Read_Register16(uint16_t reg, uint16_t *value)
+unsigned char I2C_Read_Register16(int reg, int *value)
 {
     unsigned char reg_high = (unsigned char)((reg >> 8) & 0xFF);
     unsigned char reg_low = (unsigned char)(reg & 0xFF);
@@ -382,7 +384,7 @@ unsigned char I2C_Read_Register16(uint16_t reg, uint16_t *value)
 // Register Access - 32-bit
 // ============================================================================
 
-unsigned char I2C_Write_Register32(uint16_t reg, uint32_t value)
+unsigned char I2C_Write_Register32(int reg, int value)
 {
     unsigned char reg_high = (unsigned char)((reg >> 8) & 0xFF);
     unsigned char reg_low = (unsigned char)(reg & 0xFF);
@@ -414,7 +416,7 @@ unsigned char I2C_Write_Register32(uint16_t reg, uint32_t value)
     return 1;
 }
 
-unsigned char I2C_Read_Register32(uint16_t reg, uint32_t *value)
+unsigned char I2C_Read_Register32(int reg, int *value)
 {
     unsigned char reg_high = (unsigned char)((reg >> 8) & 0xFF);
     unsigned char reg_low = (unsigned char)(reg & 0xFF);
@@ -440,8 +442,8 @@ unsigned char I2C_Read_Register32(uint16_t reg, uint32_t *value)
     byte2 = I2C_Receive_Byte(1);  // ACK
     byte3 = I2C_Receive_Byte(0);  // NACK (last byte)
 
-    *value = ((uint32_t)byte0 << 24) | ((uint32_t)byte1 << 16) |
-             ((uint32_t)byte2 << 8) | byte3;
+    *value = ((int)byte0 << 24) | ((int)byte1 << 16) |
+             ((int)byte2 << 8) | byte3;
 
     I2C_Stop();
     return 1;
@@ -466,7 +468,7 @@ unsigned char VL53L1X_Soft_Reset(void)
 
 unsigned char VL53L1X_Check_Model_ID(void)
 {
-    uint16_t model_id;
+    int model_id;
 
     if(!I2C_Read_Register16(IDENTIFICATION__MODEL_ID, &model_id)) return 0;
 
@@ -533,7 +535,7 @@ unsigned char VL53L1X_Start_Single_Shot(void)
     return 1;
 }
 
-unsigned char VL53L1X_Start_Continuous(uint32_t period_ms)
+unsigned char VL53L1X_Start_Continuous(int period_ms)
 {
     // Set inter-measurement period
     if(!I2C_Write_Register32(SYSTEM__INTERMEASUREMENT_PERIOD, period_ms * 1000)) return 0;
@@ -569,8 +571,8 @@ unsigned char VL53L1X_Is_Data_Ready(void)
 unsigned char VL53L1X_Read_Measurement(MeasurementData *data)
 {
     unsigned char status;
-    uint16_t range_mm;
-    uint16_t signal_rate, ambient_rate;
+    int range_mm;
+    int signal_rate, ambient_rate;
 
     if(!I2C_Read_Register(RESULT__RANGE_STATUS, &status)) return 0;
     if(!I2C_Read_Register16(RESULT__FINAL_CROSSTALK_CORRECTED_RANGE_MM, &range_mm)) return 0;
